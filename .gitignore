@@ -1,0 +1,42 @@
+## --- .NET / C# Specifics ---
+bin/
+obj/
+/TestResults/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## --- JetBrains Rider ---
+.idea/
+*.sln.iml
+*.ruleset
+
+## --- Visual Studio ---
+.vs/
+*.user
+*.userprefs
+*.pidb
+*.suo
+*.vspscc
+*.vssscc
+VisualStudioProcessId.txt
+AppPackages/
+BundleArtifacts/
+
+## --- VS Code ---
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+## --- OS Generated Files ---
+.DS_Store
+Thumbs.db
+
+## --- User-specific / Local Environment ---
+*.user
+.env
+.env.local
