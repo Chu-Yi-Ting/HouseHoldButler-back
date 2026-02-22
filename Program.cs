@@ -15,6 +15,39 @@ builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStore
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+// Configure Cookie
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
+});
+
+// Configure CORS
+const string myAllowSpecificOrigins = "_AllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(myAllowSpecificOrigins, policyBuilder =>
+    {
+        policyBuilder.WithOrigins("http://localhost:3000");
+        policyBuilder.AllowAnyMethod().AllowAnyHeader();
+        policyBuilder.AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
@@ -42,14 +75,8 @@ app.MapGet("/weatherforecast", (HttpContext httpContext) =>
         return forecast;
     })
     .WithName("GetWeatherForecast")
-    .WithOpenApi(
-    //     (operation, context, ct) =>
-    // {
-    //     operation.Description = "A test API for getting all weather forecasts";
-    //     operation.Summary = "Get all weather forecasts";
-    //     return Task.CompletedTask;
-    // }
-        );
+    .WithOpenApi();
 
+app.UseCors(myAllowSpecificOrigins);
 app.MapIdentityApi<IdentityUser>();
 app.Run();
