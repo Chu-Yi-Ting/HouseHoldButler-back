@@ -1,6 +1,7 @@
 using BackendApi.Constants;
 using BackendApi.Entities;
 using BackendApi.Models;
+using BackendApi.Requests.Inventory;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

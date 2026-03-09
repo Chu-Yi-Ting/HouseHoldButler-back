@@ -1,3 +1,3 @@
-namespace BackendApi.Models;
+namespace BackendApi.Requests.Inventory;
 
 public record UpdateTagRequest(string Name);

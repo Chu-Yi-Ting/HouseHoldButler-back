@@ -1,4 +1,4 @@
-namespace BackendApi.Models;
+namespace BackendApi.Requests.Inventory;
 
 public record CreateReminderRequest(
     Guid InventoryId,

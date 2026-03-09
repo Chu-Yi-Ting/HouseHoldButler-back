@@ -1,4 +1,4 @@
-﻿using BackendApi.Models;
+﻿using BackendApi.Requests.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
