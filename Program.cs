@@ -14,10 +14,10 @@ if (builder.Configuration.GetConnectionString("PostgreSQL") != null)
 {
     var formattedConnectionString = string.Format(
         builder.Configuration.GetConnectionString("PostgreSQL") ?? "",
-        builder.Configuration["POSTGRESQL:SERVER_URL"],
-        builder.Configuration["POSTGRESQL:USER_ID"],
-        builder.Configuration["POSTGRESQL:PASSWORD"],
-        builder.Configuration["POSTGRESQL:DATABASE"]
+        builder.Configuration["Postgresql:ServerUrl"],
+        builder.Configuration["Postgresql:UserId"],
+        builder.Configuration["Postgresql:Password"],
+        builder.Configuration["Postgresql:Database"]
     );
     builder.Services.AddDbContext<ApplicationDbContext>(
         options => options.UseNpgsql(formattedConnectionString)
