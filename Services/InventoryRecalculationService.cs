@@ -20,6 +20,35 @@ public class InventoryRecalculationService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Recalculates a single inventory by ID. Called immediately when an event is created.
+    /// </summary>
+    public async Task RecalculateAsync(Guid inventoryId, CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var today = DateOnly.FromDateTime(now.UtcDateTime);
+
+        var inventory = await _db.Inventories
+            .Include(i => i.Product)
+            .Include(i => i.Events)
+            .FirstOrDefaultAsync(i => i.Id == inventoryId, cancellationToken);
+
+        if (inventory is null)
+        {
+            _logger.LogWarning("Inventory {InventoryId} not found for recalculation", inventoryId);
+            return;
+        }
+
+        RecalculateSingle(inventory, now, today);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Recalculated inventory {InventoryId}, quantity={Quantity}, status={Status}",
+            inventoryId, inventory.CurrentQuantity, inventory.Status);
+    }
+
+    /// <summary>
+    /// Batch recalculates all active/depleted inventories. Called by nightly background job.
+    /// </summary>
     public async Task RecalculateAllAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTimeOffset.UtcNow;
@@ -142,10 +171,6 @@ public class InventoryRecalculationService
             // Apply event
             switch (evt.EventType)
             {
-                case InventoryEventType.Add:
-                    quantity += evt.QuantityDelta;
-                    quantity = Math.Min(1.0m, quantity);
-                    break;
                 case InventoryEventType.Adjust:
                     quantity = evt.QuantityDelta;
                     break;
