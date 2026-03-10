@@ -36,6 +36,9 @@ builder.Services.AddIdentityApiEndpoints<IdentityUser>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders(); // 這一行確保 Email / Phone Token Provider 被註冊
 
+// 加入庫存重新計算服務
+builder.Services.AddScoped<InventoryRecalculationService>();
+
 // 加入郵件發送服務
 //builder.Services.AddTransient<IEmailSender, SendGridEmailSender>();  // 您實作的 SendGridEmailSender
 builder.Services.AddTransient<IEmailSender, GmailEmailSender>();  // 您實作的 GmailEmailSender

@@ -1,3 +1,4 @@
+using BackendApi.Services;
 using Quartz;
 
 namespace BackendApi.Jobs;
@@ -9,20 +10,23 @@ namespace BackendApi.Jobs;
 [DisallowConcurrentExecution]
 public class InventoryRecalculationJob : IJob
 {
+    private readonly InventoryRecalculationService _recalculationService;
     private readonly ILogger<InventoryRecalculationJob> _logger;
 
-    public InventoryRecalculationJob(ILogger<InventoryRecalculationJob> logger)
+    public InventoryRecalculationJob(
+        InventoryRecalculationService recalculationService,
+        ILogger<InventoryRecalculationJob> logger)
     {
+        _recalculationService = recalculationService;
         _logger = logger;
     }
 
-    public Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context)
     {
         _logger.LogInformation("InventoryRecalculationJob started at {Time}", DateTimeOffset.UtcNow);
 
-        // TODO: Implement inventory recalculation logic
+        await _recalculationService.RecalculateAllAsync(context.CancellationToken);
 
         _logger.LogInformation("InventoryRecalculationJob completed at {Time}", DateTimeOffset.UtcNow);
-        return Task.CompletedTask;
     }
 }
