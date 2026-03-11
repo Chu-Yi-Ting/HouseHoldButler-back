@@ -74,10 +74,8 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 
         modelBuilder.Entity<Expenditure>(entity =>
         {
-            entity.HasIndex(e => e.CategoryId);
+            entity.HasIndex(e => e.CategoryId);                // 方便按類別查詢               
             entity.HasIndex(e => e.ExpenditureDate);           // 方便按月查詢
-            entity.HasIndex(e => new { e.CategoryId, e.ExpenditureDate.Year, e.ExpenditureDate.Month })
-                  .HasDatabaseName("IX_Expenditure_Category_Month"); // 加速月統計
 
             entity.HasOne(e => e.Category)
                   .WithMany()
