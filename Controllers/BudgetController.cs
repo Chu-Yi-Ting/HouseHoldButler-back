@@ -78,14 +78,10 @@ namespace BackendApi.Controllers
 
         // 取得未讀的預算警示通知列表（不含 Normal 等級，只回傳有意義的警示）
         [HttpGet("getBudgetAlerts")]
-        public async Task<ActionResult<List<BudgetAlertDto>>> GetBudgetAlerts([FromQuery] DateOnly? yearMonth = null)
+        public async Task<ActionResult<List<BudgetAlertDto>>> GetBudgetAlerts()
         {
-            var targetMonth = yearMonth ?? DateOnly.FromDateTime(DateTime.Today);
-
             var alerts = await _context.BudgetAlerts
-                .Where(a => a.YearMonth == targetMonth 
-                        && a.AlertLevel != BudgetAlertLevel.Normal
-                        && !a.IsRead)
+                .Where(a => !a.IsRead && a.AlertLevel != BudgetAlertLevel.Normal)
                 .Include(a => a.Category)
                 .OrderByDescending(a => a.CreatedAt)
                 .Select(a => new BudgetAlertDto
@@ -111,12 +107,8 @@ namespace BackendApi.Controllers
         [HttpGet("getUnreadAlertCount")]
         public async Task<ActionResult<int>> GetUnreadAlertCount()
         {
-            var currentMonth = DateOnly.FromDateTime(DateTime.Today);
-
             var count = await _context.BudgetAlerts
-                .Where(a => a.YearMonth == currentMonth
-                        && a.AlertLevel != BudgetAlertLevel.Normal
-                        && !a.IsRead)
+                .Where(a => !a.IsRead && a.AlertLevel != BudgetAlertLevel.Normal)
                 .CountAsync();
 
             return Ok(count);
@@ -140,14 +132,12 @@ namespace BackendApi.Controllers
             return NoContent();
         }
 
-        //標記當月所有預算警示為已讀
+        //標記所有未讀預算警示為已讀
         [HttpPatch("markAllAlertsAsRead")]
-        public async Task<IActionResult> MarkAllAlertsAsRead([FromQuery] DateOnly? yearMonth = null)
+        public async Task<IActionResult> MarkAllAlertsAsRead()
         {
-            var targetMonth = yearMonth ?? DateOnly.FromDateTime(DateTime.Today);
-
             var alerts = await _context.BudgetAlerts
-                .Where(a => a.YearMonth == targetMonth && !a.IsRead)
+                .Where(a => !a.IsRead)
                 .ToListAsync();
 
             var now = DateTimeOffset.UtcNow;
