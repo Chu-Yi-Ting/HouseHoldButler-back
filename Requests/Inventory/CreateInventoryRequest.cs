@@ -4,5 +4,5 @@ public record CreateInventoryRequest(
     Guid ProductId,
     string? Location,
     decimal InitialQuantity = 1,
-    DateOnly? NearestExpiryDate = null,
+    DateTime? NearestExpiryDate = null,
     string? Status = null);

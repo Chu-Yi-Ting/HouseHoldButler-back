@@ -80,7 +80,7 @@ public class ReminderEvaluationService
 
         // EXPIRING: fires for both ACTIVE and DEPLETED
         if (inventory.NearestExpiryDate.HasValue
-            && inventory.NearestExpiryDate.Value <= today.AddDays(ExpiryLookaheadDays))
+            && inventory.NearestExpiryDate.Value <= now.UtcDateTime.AddDays(ExpiryLookaheadDays))
         {
             if (TryCreateReminder(inventory, ReminderType.Expiring, now))
                 created++;

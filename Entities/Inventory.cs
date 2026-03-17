@@ -28,7 +28,7 @@ public class Inventory
 
     // Earliest expiry date among all active stock for this inventory.
     // Simplified alternative to full batch tracking — sufficient for Phase 1.
-    public DateOnly? NearestExpiryDate { get; set; }
+    public DateTime? NearestExpiryDate { get; set; }
 
     // See InventoryStatus constants
     public string Status { get; set; } = InventoryStatus.Active;
