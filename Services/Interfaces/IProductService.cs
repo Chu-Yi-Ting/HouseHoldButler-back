@@ -10,4 +10,5 @@ public interface IProductService
     Task<ServiceResult<Product>> CreateAsync(CreateProductRequest request);
     Task<ServiceResult<Product>> UpdateAsync(Guid id, UpdateProductRequest request);
     Task<ServiceResult<object?>> DeleteAsync(Guid id);
+    Task<ServiceResult<object?>> ForceDeleteAsync(Guid id);
 }

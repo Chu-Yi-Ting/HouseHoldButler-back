@@ -105,4 +105,31 @@ public class ProductService : IProductService
         _logger.LogInformation("Deleted product {Id}", id);
         return ServiceResult<object?>.Success(null);
     }
+
+    public async Task<ServiceResult<object?>> ForceDeleteAsync(Guid id)
+    {
+        var product = await _db.Products
+            .Include(p => p.Inventories)
+                .ThenInclude(i => i.Events)
+            .Include(p => p.Inventories)
+                .ThenInclude(i => i.Reminders)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product is null)
+            return ServiceResult<object?>.NotFound();
+
+        var inventoryCount = product.Inventories.Count;
+
+        foreach (var inventory in product.Inventories)
+        {
+            _db.InventoryEvents.RemoveRange(inventory.Events);
+            _db.Reminders.RemoveRange(inventory.Reminders);
+        }
+        _db.Inventories.RemoveRange(product.Inventories);
+        _db.Products.Remove(product);
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Force deleted product {Id} along with {Count} inventory record(s)", id, inventoryCount);
+        return ServiceResult<object?>.Success(null);
+    }
 }

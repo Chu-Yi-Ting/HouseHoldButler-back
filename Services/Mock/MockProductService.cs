@@ -112,4 +112,18 @@ public class MockProductService : IProductService
         Store.Remove(product);
         return Task.FromResult(ServiceResult<object?>.Success(null));
     }
+
+    public Task<ServiceResult<object?>> ForceDeleteAsync(Guid id)
+    {
+        var product = Store.FirstOrDefault(p => p.Id == id);
+        if (product is null)
+            return Task.FromResult(ServiceResult<object?>.NotFound());
+
+        var inventories = MockInventoryService.Store.Where(i => i.ProductId == id).ToList();
+        foreach (var inv in inventories)
+            MockInventoryService.Store.Remove(inv);
+
+        Store.Remove(product);
+        return Task.FromResult(ServiceResult<object?>.Success(null));
+    }
 }

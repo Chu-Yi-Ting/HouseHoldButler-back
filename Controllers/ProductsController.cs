@@ -28,4 +28,8 @@ public class ProductsController(IProductService productService) : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
         => this.ToActionResult(await productService.DeleteAsync(id));
+
+    [HttpDelete("{id:guid}/force")]
+    public async Task<IActionResult> ForceDelete(Guid id)
+        => this.ToActionResult(await productService.ForceDeleteAsync(id));
 }
