@@ -1,10 +1,13 @@
 using BackendApi.Jobs;
 using BackendApi.Models;
 using BackendApi.Services;
+using BackendApi.Services.Interfaces;
+using BackendApi.Services.Mock;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +42,24 @@ builder.Services.AddIdentityApiEndpoints<IdentityUser>()
 // 加入庫存重新計算服務
 builder.Services.AddScoped<InventoryRecalculationService>();
 builder.Services.AddScoped<ReminderEvaluationService>();
+
+// 加入庫存相關業務邏輯服務
+// 開發測試階段：將下方 false 改為 true 即可切換至 Mock（跳過資料庫）
+const bool useMockInventoryServices = true;
+if (useMockInventoryServices)
+{
+    builder.Services.AddSingleton<ICategoryService, MockCategoryService>();
+    builder.Services.AddSingleton<IProductService, MockProductService>();
+    builder.Services.AddSingleton<IInventoryService, MockInventoryService>();
+    builder.Services.AddSingleton<IInventoryEventService, MockInventoryEventService>();
+}
+else
+{
+    builder.Services.AddScoped<ICategoryService, CategoryService>();
+    builder.Services.AddScoped<IProductService, ProductService>();
+    builder.Services.AddScoped<IInventoryService, InventoryService>();
+    builder.Services.AddScoped<IInventoryEventService, InventoryEventService>();
+}
 
 // 加入郵件發送服務
 //builder.Services.AddTransient<IEmailSender, SendGridEmailSender>();  // 您實作的 SendGridEmailSender
@@ -81,7 +102,8 @@ builder.Services.AddQuartzHostedService(options =>
 builder.Services.AddAuthorization();
 
 // 註冊控制器所需的各項核心服務
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 // 註冊 OpenAPI 生成器，來支援 Minimal APIs 自動生成對應的 OpenAPI 文件，方便開發者使用 Swagger UI 來測試 API
 builder.Services.AddOpenApi();

@@ -1,92 +1,35 @@
-using BackendApi.Entities;
-using BackendApi.Models;
+using BackendApi.Extensions;
 using BackendApi.Requests.Inventory;
+using BackendApi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BackendApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController(ApplicationDbContext db, ILogger<ProductsController> logger) : ControllerBase
+public class ProductsController(IProductService productService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll()
-    {
-        var products = await db.Products.OrderBy(p => p.Name).ToListAsync();
-        return Ok(products);
-    }
+        => this.ToActionResult(await productService.GetAllAsync());
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
-    {
-        var product = await db.Products.FindAsync(id);
-        if (product is null)
-            return NotFound();
-        return Ok(product);
-    }
+        => this.ToActionResult(await productService.GetByIdAsync(id));
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateProductRequest request)
-    {
-        var product = new Product
-        {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            CategoryId = request.CategoryId,
-            Barcode = request.Barcode,
-            Unit = request.Unit,
-            AvgConsumptionRate = request.AvgConsumptionRate,
-            LowStockThreshold = request.LowStockThreshold,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
-
-        db.Products.Add(product);
-        await db.SaveChangesAsync();
-
-        logger.LogInformation("Created product {Id} ({Name})", product.Id, product.Name);
-        return Ok(product);
-    }
+        => this.ToActionResult(await productService.CreateAsync(request));
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateProductRequest request)
-    {
-        var product = await db.Products.FindAsync(id);
-        if (product is null)
-            return NotFound();
-
-        product.Name = request.Name;
-        product.CategoryId = request.CategoryId;
-        product.Barcode = request.Barcode;
-        product.Unit = request.Unit;
-        product.AvgConsumptionRate = request.AvgConsumptionRate;
-        product.LowStockThreshold = request.LowStockThreshold;
-        product.UpdatedAt = DateTimeOffset.UtcNow;
-
-        await db.SaveChangesAsync();
-
-        logger.LogInformation("Updated product {Id}", id);
-        return Ok(product);
-    }
+        => this.ToActionResult(await productService.UpdateAsync(id, request));
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
-    {
-        var product = await db.Products
-            .Include(p => p.Inventories)
-            .FirstOrDefaultAsync(p => p.Id == id);
+        => this.ToActionResult(await productService.DeleteAsync(id));
 
-        if (product is null)
-            return NotFound();
-
-        if (product.Inventories.Any())
-            return Conflict("Cannot delete a product that has inventory records.");
-
-        db.Products.Remove(product);
-        await db.SaveChangesAsync();
-
-        logger.LogInformation("Deleted product {Id}", id);
-        return Ok();
-    }
+    [HttpDelete("{id:guid}/force")]
+    public async Task<IActionResult> ForceDelete(Guid id)
+        => this.ToActionResult(await productService.ForceDeleteAsync(id));
 }

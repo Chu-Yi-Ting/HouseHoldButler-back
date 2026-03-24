@@ -104,7 +104,7 @@ public class InventoryRecalculationService
             .ToList();
 
         // Step 1: Check expiry
-        if (inventory.NearestExpiryDate.HasValue && inventory.NearestExpiryDate.Value <= today)
+        if (inventory.NearestExpiryDate.HasValue && inventory.NearestExpiryDate.Value <= now.UtcDateTime)
         {
             inventory.Status = InventoryStatus.Expired;
             inventory.CurrentQuantity = 0;
